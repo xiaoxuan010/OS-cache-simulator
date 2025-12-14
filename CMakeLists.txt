@@ -25,6 +25,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 set(SOURCES
     src/cache.cpp
     src/lru_cache.cpp
+    src/cache_simulator.cpp
 )
 
 # 创建可执行文件

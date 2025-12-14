@@ -58,4 +58,10 @@ namespace cache_sim
         }
         return nullptr;
     }
+
+    // 重置统计信息
+    void Cache::resetStats()
+    {
+        stats_ = CacheStats();
+    }
 }

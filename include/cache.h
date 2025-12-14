@@ -38,6 +38,24 @@ namespace cache_sim
         }
     };
 
+    // 缓存统计信息
+    struct CacheStats
+    {
+        uint64_t hits;   // 命中次数
+        uint64_t misses; // 缺失次数
+        uint64_t reads;  // 读操作次数
+        uint64_t writes; // 写操作次数
+
+        CacheStats() : hits(0), misses(0), reads(0), writes(0) {}
+
+        // 计算命中率
+        double hitRate() const
+        {
+            uint64_t total = hits + misses;
+            return total > 0 ? static_cast<double>(hits) / total : 0.0;
+        }
+    };
+
     // 缓存基类
     class Cache
     {
@@ -60,6 +78,9 @@ namespace cache_sim
         // 查找缓存行
         CacheLine *findLine(uint64_t address);
 
+        // 重置统计信息
+        void resetStats();
+
         // 读取数据
         virtual bool read(uint64_t address) = 0;
 
@@ -72,9 +93,15 @@ namespace cache_sim
         // 更新访问信息（由子类实现）
         virtual void updateAccessInfo(CacheLine *line) = 0;
 
+        // 获取统计信息
+        const CacheStats &getStats() const { return stats_; }
+
     protected:
         // 缓存配置
         CacheConfig config_;
+
+        // 缓存统计信息
+        CacheStats stats_;
 
         // 缓存组
         std::vector<CacheSet> sets_;

@@ -10,15 +10,19 @@ namespace cache_sim
 
     bool LRUCache::read(uint64_t address)
     {
+        stats_.reads++;
+
         CacheLine *line = findLine(address);
         if (line != nullptr)
         {
             // 缓存命中
+            stats_.hits++;
             updateAccessInfo(line);
             return true;
         }
 
         // 缓存缺失
+        stats_.misses++;
 
         // 选择要替换的缓存行
         size_t set_index = getSetIndex(address);
@@ -36,10 +40,13 @@ namespace cache_sim
 
     bool LRUCache::write(uint64_t address, uint8_t /*value*/)
     {
+        stats_.writes++;
+
         CacheLine *line = findLine(address);
         if (line != nullptr)
         {
             // 缓存命中
+            stats_.hits++;
             line->dirty = true;
             line->state = MESIState::Modified;
             updateAccessInfo(line);
@@ -47,6 +54,7 @@ namespace cache_sim
         }
 
         // 缓存缺失
+        stats_.misses++;
 
         // 选择要替换的缓存行
         size_t set_index = getSetIndex(address);
