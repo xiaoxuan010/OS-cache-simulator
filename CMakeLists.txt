@@ -24,6 +24,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 # 源文件列表
 set(SOURCES
     src/cache.cpp
+    src/lru_cache.cpp
 )
 
 # 创建可执行文件

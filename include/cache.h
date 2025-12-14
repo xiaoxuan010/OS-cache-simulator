@@ -31,6 +31,11 @@ namespace cache_sim
               policy(ReplacementPolicy::LRU)
         {
         }
+
+        CacheConfig(size_t c_size, size_t b_size, size_t assoc, ReplacementPolicy pol = ReplacementPolicy::LRU)
+            : cache_size(c_size), block_size(b_size), associativity(assoc), policy(pol)
+        {
+        }
     };
 
     // 缓存基类
@@ -54,6 +59,18 @@ namespace cache_sim
 
         // 查找缓存行
         CacheLine *findLine(uint64_t address);
+
+        // 读取数据
+        virtual bool read(uint64_t address) = 0;
+
+        // 写入数据
+        virtual bool write(uint64_t address, uint8_t value) = 0;
+
+        // 选择要替换的缓存行（由子类实现具体策略）
+        virtual CacheLine *selectVictim(size_t set_index) = 0;
+
+        // 更新访问信息（由子类实现）
+        virtual void updateAccessInfo(CacheLine *line) = 0;
 
     protected:
         // 缓存配置
