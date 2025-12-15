@@ -2,6 +2,7 @@
 #define CACHE_SIMULATOR_H
 
 #include "cache.h"
+#include "bus.h"
 #include <bits/stdc++.h>
 
 namespace cache_sim
@@ -29,12 +30,13 @@ namespace cache_sim
         size_t address_range;         // 地址范围
         AccessPattern access_pattern; // 访问模式
         ReplacementPolicy replacement_policy; // 替换策略
+        int num_cores;                        // 核心数量
 
         // 获取当前替换策略的名称
         static std::string getPolicyName(ReplacementPolicy policy);
 
-        SimulatorConfig(size_t accesses = 10000, size_t range = 1048576, AccessPattern pattern = AccessPattern::Random, ReplacementPolicy policy = ReplacementPolicy::LRU)
-            : num_accesses(accesses), address_range(range), access_pattern(pattern), replacement_policy(policy)
+        SimulatorConfig(size_t accesses = 10000, size_t range = 1048576, AccessPattern pattern = AccessPattern::Random, ReplacementPolicy policy = ReplacementPolicy::LRU, int cores = 1)
+            : num_accesses(accesses), address_range(range), access_pattern(pattern), replacement_policy(policy), num_cores(cores)
         {
         }
     };
@@ -57,16 +59,17 @@ namespace cache_sim
 
     private:
         SimulatorConfig config_;
-        std::unique_ptr<Cache> cache_;
+        std::unique_ptr<Bus> bus_;
+        std::vector<std::unique_ptr<Cache>> caches_;
 
         // 创建缓存实例
-        void createCache();
+        void createCaches();
 
         // 生成访问地址
         uint64_t generateAddress(size_t index) const;
 
         // 执行单次访问
-        void performAccess(uint64_t address, bool is_write);
+        void performAccess(size_t core_id, uint64_t address, bool is_write);
     };
 
 } // namespace cache_sim

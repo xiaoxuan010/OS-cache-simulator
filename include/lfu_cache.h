@@ -10,14 +10,12 @@ namespace cache_sim
     class LFUCache : public Cache
     {
     public:
-        explicit LFUCache(const CacheConfig &config);
+        using Cache::Cache;
         ~LFUCache() override = default;
 
-        bool read(uint64_t address) override;
-        bool write(uint64_t address, uint8_t value) override;
-        
         CacheLine *selectVictim(size_t set_index) override;
         void updateAccessInfo(CacheLine *line) override;
+        void resetLine(CacheLine *line) override;
     };
 
 } // namespace cache_sim

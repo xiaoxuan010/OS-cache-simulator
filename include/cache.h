@@ -2,6 +2,7 @@
 #define CACHE_H
 
 #include "cache_line.h"
+#include "bus.h"
 #include <bits/stdc++.h>
 
 namespace cache_sim
@@ -31,10 +32,10 @@ namespace cache_sim
     // 缓存统计信息
     struct CacheStats
     {
-        uint64_t hits;   // 命中次数
-        uint64_t misses; // 缺失次数
-        uint64_t reads;  // 读操作次数
-        uint64_t writes; // 写操作次数
+        uint64_t hits;      // 命中次数
+        uint64_t misses;    // 缺失次数
+        uint64_t reads;     // 读操作次数
+        uint64_t writes;    // 写操作次数
         uint64_t conflicts; // 冲突次数
 
         CacheStats() : hits(0), misses(0), reads(0), writes(0), conflicts(0) {}
@@ -58,11 +59,15 @@ namespace cache_sim
     class Cache
     {
     public:
-        explicit Cache(const CacheConfig &config);
+        // 构造函数
+        Cache(const CacheConfig &config, int id = 0, Bus *bus = nullptr);
         virtual ~Cache() = default;
 
         // 获取配置
         const CacheConfig &getConfig() const { return config_; }
+
+        // 获取 ID
+        int getId() const { return id_; }
 
         // 计算组索引
         size_t getSetIndex(uint64_t address) const;
@@ -80,10 +85,14 @@ namespace cache_sim
         void resetStats();
 
         // 读取数据
-        virtual bool read(uint64_t address) = 0;
+        bool read(uint64_t address);
 
         // 写入数据
-        virtual bool write(uint64_t address, uint8_t value) = 0;
+        bool write(uint64_t address, uint8_t value);
+
+        // 嗅探总线请求
+        // 返回 true 表示本地缓存拥有该数据块
+        bool snoop(uint64_t address, BusEvent event);
 
         // 选择要替换的缓存行（由子类实现具体策略）
         virtual CacheLine *selectVictim(size_t set_index) = 0;
@@ -91,12 +100,24 @@ namespace cache_sim
         // 更新访问信息（由子类实现）
         virtual void updateAccessInfo(CacheLine *line) = 0;
 
+        // 重置缓存行信息（当行被驱逐或重新分配时调用，由子类实现）
+        virtual void resetLine(CacheLine *) = 0;
+
         // 获取统计信息
-        const CacheStats &getStats() const { return stats_; }
+        const CacheStats &getStats() const
+        {
+            return stats_;
+        }
 
     protected:
         // 缓存配置
         CacheConfig config_;
+
+        // 缓存 ID
+        int id_;
+
+        // 总线指针
+        Bus *bus_;
 
         // 缓存统计信息
         CacheStats stats_;

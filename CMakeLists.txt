@@ -27,6 +27,7 @@ set(SOURCES
     src/lru_cache.cpp
     src/lfu_cache.cpp
     src/cache_simulator.cpp
+    src/bus.cpp
 )
 
 # 创建可执行文件
@@ -45,4 +46,3 @@ target_link_libraries(cache_sim_tests GTest::gtest_main)
 
 include(GoogleTest)
 gtest_discover_tests(cache_sim_tests)
-

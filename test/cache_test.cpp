@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "lru_cache.h"
 #include "lfu_cache.h"
+#include "bus.h"
 
 using namespace cache_sim;
 
@@ -165,4 +166,48 @@ TEST(CacheStats, ConflictRate)
     EXPECT_EQ(stats.misses, 3);
     EXPECT_EQ(stats.conflicts, 1);
     EXPECT_DOUBLE_EQ(stats.conflictRate(), 1.0 / 3.0);
+}
+
+// MESI 协议一致性测试
+TEST(MESI, Coherence)
+{
+    CacheConfig config;
+    config.cache_size = 1024;
+    config.block_size = 16;
+    config.associativity = 4;
+
+    Bus bus;
+    LRUCache cache1(config, 0, &bus);
+    LRUCache cache2(config, 1, &bus);
+
+    bus.attach(&cache1);
+    bus.attach(&cache2);
+
+    uint64_t addr = 0x1000;
+
+    // 1. Cache1 读取数据 -> Exclusive
+    cache1.read(addr);
+    CacheLine *line1 = cache1.findLine(addr);
+    ASSERT_NE(line1, nullptr);
+    EXPECT_EQ(line1->state, MESIState::Exclusive);
+
+    // 2. Cache2 读取同一数据 -> Shared, Cache1 降级为 Shared
+    cache2.read(addr);
+    CacheLine *line2 = cache2.findLine(addr);
+    ASSERT_NE(line2, nullptr);
+    EXPECT_EQ(line2->state, MESIState::Shared);
+    EXPECT_EQ(line1->state, MESIState::Shared);
+
+    // 3. Cache1 写入数据 -> Modified, Cache2 失效
+    cache1.write(addr, 0xFF);
+    EXPECT_EQ(line1->state, MESIState::Modified);
+    EXPECT_EQ(line2->state, MESIState::Invalid);
+    EXPECT_FALSE(line2->valid);
+
+    // 4. Cache2 再次读取 -> Shared, Cache1 降级为 Shared
+    cache2.read(addr);
+    line2 = cache2.findLine(addr);
+    ASSERT_NE(line2, nullptr);
+    EXPECT_EQ(line2->state, MESIState::Shared);
+    EXPECT_EQ(line1->state, MESIState::Shared);
 }
