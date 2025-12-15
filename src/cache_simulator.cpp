@@ -19,11 +19,12 @@ namespace cache_sim
     void CacheSimulator::run()
     {
         std::cout << "开始缓存模拟..." << std::endl;
+        std::cout << "访问模式: " << getPatterName(config_.access_pattern) << std::endl;
         std::cout << "访问次数: " << config_.num_accesses << std::endl;
 
         for (size_t i = 0; i < config_.num_accesses; ++i)
         {
-            uint64_t address = generateAddress();
+            uint64_t address = generateAddress(i);
             bool is_write = (i % 4 == 0); // 模拟 25% 的写操作
             performAccess(address, is_write);
         }
@@ -58,14 +59,44 @@ namespace cache_sim
         std::cout << "==================================" << std::endl;
     }
 
-    uint64_t CacheSimulator::generateAddress() const
+    uint64_t CacheSimulator::generateAddress(size_t index) const
     {
         // 随机种子
-        static std::mt19937_64 rng(20232005046);
+        static std::mt19937_64 rng(std::chrono::steady_clock::now().time_since_epoch().count());
 
-        // 随机访问
-        std::uniform_int_distribution<uint64_t> dist(0, config_.address_range - 1);
-        return dist(rng);
+        switch (config_.access_pattern)
+        {
+        case AccessPattern::Random:
+        {
+            std::uniform_int_distribution<uint64_t> dist(0, config_.address_range - 1);
+            return dist(rng);
+        }
+        case AccessPattern::Sequential:
+        {
+            return (index * 4) % config_.address_range;
+        }    
+        case AccessPattern::Localized:
+        {
+            // 模拟局部性：90% 的访问在小范围内，10% 随机访问
+            std::uniform_real_distribution<double> prob_dist(0.0, 1.0);
+            if (prob_dist(rng) < 0.9)
+            {
+                // 局部访问：在当前工作集附近
+                size_t working_set_size = config_.cache_config.cache_size;
+                size_t base = (index / 1000) * working_set_size;
+                std::uniform_int_distribution<uint64_t> local_dist(0, working_set_size - 1);
+                return (base + local_dist(rng)) % config_.address_range;
+            }
+            else
+            {
+                // 随机访问
+                std::uniform_int_distribution<uint64_t> dist(0, config_.address_range - 1);
+                return dist(rng);
+            }
+        }
+        default:
+            return 0;
+        }
     }
 
     void CacheSimulator::performAccess(uint64_t address, bool is_write)
@@ -77,6 +108,21 @@ namespace cache_sim
         else
         {
             cache_->read(address);
+        }
+    }
+
+    std::string CacheSimulator::getPatterName(AccessPattern pattern)
+    {
+        switch (pattern)
+        {
+        case AccessPattern::Random:
+            return "随机访问";
+        case AccessPattern::Sequential:
+            return "顺序访问";
+        case AccessPattern::Localized:
+            return "局部性访问";
+        default:
+            return "未知模式";
         }
     }
 

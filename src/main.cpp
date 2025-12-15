@@ -8,6 +8,7 @@ int main()
     cache_sim::SimulatorConfig sim_config;
     sim_config.num_accesses = 50000;    // 访问次数
     sim_config.address_range = 1 << 20; // 1MB 地址范围
+    sim_config.access_pattern = cache_sim::AccessPattern::Sequential;
 
     cache_sim::CacheSimulator simulator(sim_config);
     simulator.run();
