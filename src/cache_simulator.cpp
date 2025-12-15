@@ -108,7 +108,7 @@ namespace cache_sim
         }
         case AccessPattern::Sequential:
         {
-            return (index * 4) % config_.address_range;
+            return (index * caches_[0]->getConfig().block_size) % config_.address_range;
         }    
         case AccessPattern::Localized:
         {
@@ -118,7 +118,7 @@ namespace cache_sim
             {
                 // 局部访问：在当前工作集附近
                 size_t working_set_size = config_.cache_config.cache_size;
-                size_t base = (index / 1000) * working_set_size;
+                size_t base = (index / config_.working_set_period) * working_set_size;
                 std::uniform_int_distribution<uint64_t> local_dist(0, working_set_size - 1);
                 return (base + local_dist(rng)) % config_.address_range;
             }
