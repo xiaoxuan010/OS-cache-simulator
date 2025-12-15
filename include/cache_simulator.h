@@ -30,18 +30,13 @@ namespace cache_sim
         AccessPattern access_pattern; // 访问模式
         ReplacementPolicy replacement_policy; // 替换策略
 
-        SimulatorConfig()
-            : num_accesses(10000), address_range(1048576), access_pattern(AccessPattern::Random), replacement_policy(ReplacementPolicy::LRU)
-        {
-        }
+        // 获取当前替换策略的名称
+        static std::string getPolicyName(ReplacementPolicy policy);
 
         SimulatorConfig(size_t accesses = 10000, size_t range = 1048576, AccessPattern pattern = AccessPattern::Random, ReplacementPolicy policy = ReplacementPolicy::LRU)
             : num_accesses(accesses), address_range(range), access_pattern(pattern), replacement_policy(policy)
         {
         }
-
-        // 获取当前替换策略的名称
-        static std::string getPolicyName(ReplacementPolicy policy);
     };
 
     // 缓存模拟器
