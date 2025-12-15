@@ -5,10 +5,36 @@ int main()
 {
     std::cout << "OS-cache-simulator: 基于 LRU 的用户态缓存系统模拟器" << std::endl;
 
-    cache_sim::SimulatorConfig sim_config;
-    sim_config.num_accesses = 50000;    // 访问次数
-    sim_config.address_range = 1 << 20; // 1MB 地址范围
-    sim_config.access_pattern = cache_sim::AccessPattern::Sequential;
+    std::cout << "请输入访问次数：";
+    size_t num_accesses;
+    std::cin >> num_accesses;
+
+    std::cout << "请输入地址范围（字节）：";
+    size_t address_range;
+    std::cin >> address_range;
+
+    std::cout << "请选择访问模式（0=随机访问, 1=顺序访问, 2=局部性访问）：";
+    int pattern_choice;
+    std::cin >> pattern_choice;
+    cache_sim::AccessPattern access_pattern;
+    switch (pattern_choice)
+    {
+    case 0:
+        access_pattern = cache_sim::AccessPattern::Random;
+        break;
+    case 1:
+        access_pattern = cache_sim::AccessPattern::Sequential;
+        break;
+    case 2:
+        access_pattern = cache_sim::AccessPattern::Localized;
+        break;
+    default:
+        std::cout << "无效选择，使用默认的随机访问模式。" << std::endl;
+        access_pattern = cache_sim::AccessPattern::Random;
+        break;
+    }
+
+    cache_sim::SimulatorConfig sim_config(num_accesses, address_range, access_pattern);
 
     cache_sim::CacheSimulator simulator(sim_config);
     simulator.run();

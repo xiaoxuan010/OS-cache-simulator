@@ -25,6 +25,11 @@ namespace cache_sim
             : num_accesses(10000), address_range(1048576), access_pattern(AccessPattern::Random) // 1MB
         {
         }
+
+        SimulatorConfig(size_t accesses, size_t range, AccessPattern pattern)
+            : num_accesses(accesses), address_range(range), access_pattern(pattern)
+        {
+        }
     };
 
     // 缓存模拟器
