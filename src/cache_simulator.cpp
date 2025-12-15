@@ -1,5 +1,6 @@
 #include "cache_simulator.h"
 #include "lru_cache.h"
+#include "lfu_cache.h"
 #include "bits/stdc++.h"
 
 namespace cache_sim
@@ -13,12 +14,27 @@ namespace cache_sim
 
     void CacheSimulator::createCache()
     {
-        cache_ = std::make_unique<LRUCache>(config_.cache_config);
+        // cache_ = std::make_unique<LRUCache>(config_.cache_config);
+        switch (config_.replacement_policy)
+        {
+        case ReplacementPolicy::LRU:
+            cache_ = std::make_unique<LRUCache>(config_.cache_config);
+            break;
+        case ReplacementPolicy::LFU:
+            cache_ = std::make_unique<LFUCache>(config_.cache_config);
+            break;
+
+        default:
+            std::cerr << "[Warning] 未知的替换策略，使用默认的 LRU 策略。" << std::endl;
+            cache_ = std::make_unique<LRUCache>(config_.cache_config);
+            break;
+        }
     }
 
     void CacheSimulator::run()
     {
         std::cout << "开始缓存模拟..." << std::endl;
+        std::cout << "替换策略: " << SimulatorConfig::getPolicyName(config_.replacement_policy) << std::endl;
         std::cout << "访问模式: " << getPatterName(config_.access_pattern) << std::endl;
         std::cout << "访问次数: " << config_.num_accesses << std::endl;
 
@@ -123,6 +139,19 @@ namespace cache_sim
             return "局部性访问";
         default:
             return "未知模式";
+        }
+    }
+
+    std::string SimulatorConfig::getPolicyName(ReplacementPolicy policy)
+    {
+        switch (policy)
+        {
+        case ReplacementPolicy::LRU:
+            return "LRU";
+        case ReplacementPolicy::LFU:
+            return "LFU";
+        default:
+            return "未知策略";
         }
     }
 

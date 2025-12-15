@@ -34,8 +34,25 @@ int main()
         break;
     }
 
-    cache_sim::SimulatorConfig sim_config(num_accesses, address_range, access_pattern);
+    std::cout << "请选择替换策略（0=LRU, 1=LFU）：";
+    int policy_choice;
+    std::cin >> policy_choice;
+    cache_sim::ReplacementPolicy replacement_policy;
+    switch (policy_choice)
+    {
+    case 0:
+        replacement_policy = cache_sim::ReplacementPolicy::LRU;
+        break;
+    case 1:
+        replacement_policy = cache_sim::ReplacementPolicy::LFU;
+        break;
+    default:
+        std::cout << "无效选择，使用默认的 LRU 策略。" << std::endl;
+        replacement_policy = cache_sim::ReplacementPolicy::LRU;
+        break;
+    }
 
+    cache_sim::SimulatorConfig sim_config(num_accesses, address_range, access_pattern, replacement_policy);
     cache_sim::CacheSimulator simulator(sim_config);
     simulator.run();
     simulator.printResults();

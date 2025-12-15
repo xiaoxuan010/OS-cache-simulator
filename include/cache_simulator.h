@@ -6,11 +6,19 @@
 
 namespace cache_sim
 {
+    // 访问模式
     enum class AccessPattern
     {
         Random,     // 随机访问
         Sequential, // 顺序访问
         Localized   // 局部性访问
+    };
+
+    // 缓存替换策略
+    enum class ReplacementPolicy
+    {
+        LRU,
+        LFU
     };
 
     // 模拟器配置
@@ -20,16 +28,20 @@ namespace cache_sim
         size_t num_accesses;          // 访问次数
         size_t address_range;         // 地址范围
         AccessPattern access_pattern; // 访问模式
+        ReplacementPolicy replacement_policy; // 替换策略
 
         SimulatorConfig()
-            : num_accesses(10000), address_range(1048576), access_pattern(AccessPattern::Random) // 1MB
+            : num_accesses(10000), address_range(1048576), access_pattern(AccessPattern::Random), replacement_policy(ReplacementPolicy::LRU)
         {
         }
 
-        SimulatorConfig(size_t accesses, size_t range, AccessPattern pattern)
-            : num_accesses(accesses), address_range(range), access_pattern(pattern)
+        SimulatorConfig(size_t accesses = 10000, size_t range = 1048576, AccessPattern pattern = AccessPattern::Random, ReplacementPolicy policy = ReplacementPolicy::LRU)
+            : num_accesses(accesses), address_range(range), access_pattern(pattern), replacement_policy(policy)
         {
         }
+
+        // 获取当前替换策略的名称
+        static std::string getPolicyName(ReplacementPolicy policy);
     };
 
     // 缓存模拟器

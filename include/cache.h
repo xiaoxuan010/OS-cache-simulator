@@ -6,20 +6,12 @@
 
 namespace cache_sim
 {
-    // 缓存替换策略
-    enum class ReplacementPolicy
-    {
-        LRU,
-        LFU
-    };
-
     // 缓存配置
     struct CacheConfig
     {
-        size_t cache_size;        // 缓存总大小（字节）
-        size_t block_size;        // 块大小（字节）
-        size_t associativity;     // 关联度（1=直接映射, N=N路组相联）
-        ReplacementPolicy policy; // 替换策略
+        size_t cache_size;    // 缓存总大小（字节）
+        size_t block_size;    // 块大小（字节）
+        size_t associativity; // 关联度（1=直接映射, N=N路组相联）
 
         CacheConfig()
             : cache_size(32768) // 默认 32KB
@@ -27,13 +19,11 @@ namespace cache_sim
               block_size(64) // 默认 64 字节
               ,
               associativity(4) // 默认 4 路组相联
-              ,
-              policy(ReplacementPolicy::LRU)
         {
         }
 
-        CacheConfig(size_t c_size, size_t b_size, size_t assoc, ReplacementPolicy pol = ReplacementPolicy::LRU)
-            : cache_size(c_size), block_size(b_size), associativity(assoc), policy(pol)
+        CacheConfig(size_t c_size, size_t b_size, size_t assoc)
+            : cache_size(c_size), block_size(b_size), associativity(assoc)
         {
         }
     };
