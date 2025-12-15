@@ -71,6 +71,8 @@ namespace cache_sim
         std::cout << "缓存缺失: " << stats.misses << std::endl;
         std::cout << std::fixed << std::setprecision(2);
         std::cout << "命中率: " << stats.hitRate() * 100 << "%" << std::endl;
+        std::cout << "冲突次数: " << stats.conflicts << std::endl;
+        std::cout << "冲突率: " << stats.conflictRate() * 100 << "%" << std::endl;
         std::cout << std::endl;
         std::cout << "==================================" << std::endl;
     }

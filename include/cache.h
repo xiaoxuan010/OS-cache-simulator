@@ -35,14 +35,22 @@ namespace cache_sim
         uint64_t misses; // 缺失次数
         uint64_t reads;  // 读操作次数
         uint64_t writes; // 写操作次数
+        uint64_t conflicts; // 冲突次数
 
-        CacheStats() : hits(0), misses(0), reads(0), writes(0) {}
+        CacheStats() : hits(0), misses(0), reads(0), writes(0), conflicts(0) {}
 
         // 计算命中率
         double hitRate() const
         {
             uint64_t total = hits + misses;
             return total > 0 ? static_cast<double>(hits) / total : 0.0;
+        }
+
+        // 计算冲突率
+        double conflictRate() const
+        {
+            uint64_t total = hits + misses;
+            return total > 0 ? static_cast<double>(conflicts) / total : 0.0;
         }
     };
 

@@ -87,6 +87,7 @@ namespace cache_sim
             }
         }
 
+        stats_.conflicts++;
         // 选择最不经常使用的缓存行
         for (auto &line : set.lines)
         {

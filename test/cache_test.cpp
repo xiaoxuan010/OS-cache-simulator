@@ -145,3 +145,24 @@ TEST(CacheStats, HitRate)
     EXPECT_DOUBLE_EQ(stats.hitRate(), 0.5);
 }
 
+// Cache 冲突率统计测试
+TEST(CacheStats, ConflictRate)
+{
+    CacheConfig config(512, 16, 2);
+    LRUCache cache(config);
+
+    // 都映射到同一组（index = 0）
+    uint32_t A = 0x0000; // index 0
+    uint32_t B = 0x0100; // index 0
+    uint32_t C = 0x0200; // index 0
+
+    cache.read(A); // 未命中，插入A
+    cache.read(B); // 未命中，插入B（组已满：A,B）
+    cache.read(C); // 未命中 -> 冲突，淘汰LRU（A），插入C
+
+    const auto &stats = cache.getStats();
+    EXPECT_EQ(stats.hits, 0);
+    EXPECT_EQ(stats.misses, 3);
+    EXPECT_EQ(stats.conflicts, 1);
+    EXPECT_DOUBLE_EQ(stats.conflictRate(), 1.0 / 3.0);
+}
