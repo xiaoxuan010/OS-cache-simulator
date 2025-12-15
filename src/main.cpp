@@ -17,14 +17,14 @@ void printUsage(const char *program_name)
     std::cout << "  -b, --block <字节>      块大小（默认: 64）" << std::endl;
     std::cout << "  -a, --assoc <数值>      关联度（默认: 4，即 4 路组相联）" << std::endl;
     std::cout << "  -p, --policy <策略>     替换策略: lru 或 lfu（默认: lru）" << std::endl;
-    std::cout << "  -t, --pattern <模式>    访问模式: random, sequential, locality（默认: random）" << std::endl;
+    std::cout << "  -t, --pattern <模式>    访问模式: random, sequential, localized（默认: random）" << std::endl;
     std::cout << "  -n, --accesses <次数>   访问次数（默认: 10000）" << std::endl;
     std::cout << "  -r, --range <字节>      地址范围（默认: 1048576，即 1MB）" << std::endl;
     std::cout << "  -c, --cores <数量>      CPU 核心数（默认: 1）" << std::endl;
     std::cout << std::endl;
     std::cout << "示例:" << std::endl;
     std::cout << "  " << program_name << " -s 65536 -b 64 -a 4 -p lru -t random -n 10000" << std::endl;
-    std::cout << "  " << program_name << " --size 32768 --policy lfu --pattern locality" << std::endl;
+    std::cout << "  " << program_name << " --size 32768 --policy lfu --pattern localized" << std::endl;
 }
 
 /**
@@ -110,7 +110,7 @@ bool parseArguments(int argc, char *argv[], SimulatorConfig &config)
             {
                 config.access_pattern = AccessPattern::Sequential;
             }
-            else if (pattern == "locality")
+            else if (pattern == "localized")
             {
                 config.access_pattern = AccessPattern::Localized;
             }
