@@ -27,6 +27,11 @@ namespace cache_sim
                 min_count = line.access_count;
                 victim = &line;
             }
+            else if (line.access_count == min_count && victim != nullptr && line.last_access_time < victim->last_access_time)
+            {
+                // 如果访问次数相同，选择最早访问的（LRU 作为辅助策略）
+                victim = &line;
+            }
         }
 
         return victim;
@@ -37,6 +42,7 @@ namespace cache_sim
         if (line != nullptr)
         {
             line->access_count++;
+            line->last_access_time = static_cast<uint64_t>(std::chrono::steady_clock::now().time_since_epoch().count());
         }
     }
 
