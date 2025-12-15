@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "lru_cache.h"
+#include "lfu_cache.h"
 
 using namespace cache_sim;
 
@@ -70,4 +71,52 @@ TEST(LRUCache, LRUReplacement)
     EXPECT_FALSE(cache.read(A)); // A已被淘汰 -> 未命中
     EXPECT_TRUE(cache.read(C));  // C应在缓存中 -> 命中
     EXPECT_TRUE(cache.read(A));  // A应仍在缓存中 -> 命中
+}
+
+// LFU 缓存读写基本功能测试
+TEST(LFUCache, ReadWrite_Basic)
+{
+    CacheConfig config;
+    config.cache_size = 1024; // 1KB
+    config.block_size = 16;   // 16B
+    config.associativity = 4; // 4 路组相联
+
+    LFUCache cache(config);
+
+    uint64_t A = 0x1000;
+
+    // 初始读取，应该是缺失
+    EXPECT_FALSE(cache.read(A));
+
+    // 再次读取，应该是命中
+    EXPECT_TRUE(cache.read(A));
+
+    uint64_t B = 0x2000;
+
+    // 写入数据
+    EXPECT_FALSE(cache.write(B, 0xAB));
+
+    // 读取写入的数据，应该是命中
+    EXPECT_TRUE(cache.read(B));
+}
+
+// LFU 替换策略基础测试
+TEST(LFUCache, LFUReplacement)
+{
+    CacheConfig config(512, 16, 2);
+    LFUCache cache(config);
+
+    // 都映射到同一组（index = 0）
+    uint32_t A = 0x0000; // index 0
+    uint32_t B = 0x0100; // index 0
+    uint32_t C = 0x0200; // index 0
+
+    EXPECT_FALSE(cache.read(A)); // 未命中，插入A
+    EXPECT_TRUE(cache.read(A));  // 命中
+    EXPECT_FALSE(cache.read(B)); // 未命中，插入B（组已满：A,B）
+    EXPECT_FALSE(cache.read(C)); // 未命中 -> 淘汰LFU（B），插入C
+
+    EXPECT_TRUE(cache.read(A));  // A应在缓存中 -> 命中
+    EXPECT_TRUE(cache.read(C));  // C应仍在缓存中 -> 命中
+    EXPECT_FALSE(cache.read(B)); // B已被淘汰 -> 未命中
 }
