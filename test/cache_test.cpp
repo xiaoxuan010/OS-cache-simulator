@@ -120,3 +120,28 @@ TEST(LFUCache, LFUReplacement)
     EXPECT_TRUE(cache.read(C));  // C应仍在缓存中 -> 命中
     EXPECT_FALSE(cache.read(B)); // B已被淘汰 -> 未命中
 }
+
+// Cache 命中率统计测试
+TEST(CacheStats, HitRate)
+{
+    CacheConfig config;
+    config.cache_size = 1024;
+    config.block_size = 16;
+    config.associativity = 4;
+
+    LRUCache cache(config);
+
+    uint64_t A = 0x1000;
+    uint64_t B = 0x2000;
+
+    cache.read(A);  // 未命中
+    cache.read(A);  // 命中
+    cache.read(B);  // 未命中
+    cache.read(B);  // 命中
+
+    const auto &stats = cache.getStats();
+    EXPECT_EQ(stats.hits, 2);
+    EXPECT_EQ(stats.misses, 2);
+    EXPECT_DOUBLE_EQ(stats.hitRate(), 0.5);
+}
+
