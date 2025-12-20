@@ -42,12 +42,6 @@ namespace cache_sim
 
     void CacheSimulator::run()
     {
-        std::cout << "开始缓存模拟..." << std::endl;
-        std::cout << "核心数量: " << config_.num_cores << std::endl;
-        std::cout << "替换策略: " << SimulatorConfig::getPolicyName(config_.replacement_policy) << std::endl;
-        std::cout << "访问模式: " << getPatterName(config_.access_pattern) << std::endl;
-        std::cout << "访问次数: " << config_.num_accesses << std::endl;
-
         // 随机种子用于选择核心
         static std::mt19937 rng(std::chrono::steady_clock::now().time_since_epoch().count());
         std::uniform_int_distribution<int> core_dist(0, config_.num_cores - 1);
@@ -55,18 +49,20 @@ namespace cache_sim
         for (size_t i = 0; i < config_.num_accesses; ++i)
         {
             uint64_t address = generateAddress(i);
-            bool is_write = (i % 4 == 0); // 模拟 25% 的写操作
+            bool is_write = (i % 4 == 0);    // 模拟 25% 的写操作
             size_t core_id = core_dist(rng); // 随机选择一个核心发起请求
             performAccess(core_id, address, is_write);
         }
-
-        std::cout << "模拟完成!" << std::endl;
     }
 
     void CacheSimulator::printResults() const
     {
-        std::cout << std::endl;
         std::cout << "========== 缓存模拟结果 ==========" << std::endl;
+        std::cout << "--- 模拟器配置 ---" << std::endl;
+        std::cout << "核心数量: " << config_.num_cores << std::endl;
+        std::cout << "替换策略: " << SimulatorConfig::getPolicyName(config_.replacement_policy) << std::endl;
+        std::cout << "访问模式: " << getPatterName(config_.access_pattern) << std::endl;
+        std::cout << "访问次数: " << config_.num_accesses << std::endl;
         std::cout << std::endl;
 
         const CacheConfig &config = caches_[0]->getConfig();
@@ -109,7 +105,7 @@ namespace cache_sim
         case AccessPattern::Sequential:
         {
             return (index * caches_[0]->getConfig().block_size) % config_.address_range;
-        }    
+        }
         case AccessPattern::Localized:
         {
             // 模拟局部性：90% 的访问在小范围内，10% 随机访问
@@ -162,6 +158,30 @@ namespace cache_sim
         default:
             return "未知模式";
         }
+    }
+
+    CacheStats CacheSimulator::getAverageStats() const
+    {
+        CacheStats avg_stats;
+        for (const auto &cache : caches_)
+        {
+            const CacheStats &stats = cache->getStats();
+            avg_stats.hits += stats.hits;
+            avg_stats.misses += stats.misses;
+            avg_stats.reads += stats.reads;
+            avg_stats.writes += stats.writes;
+            avg_stats.conflicts += stats.conflicts;
+        }
+        size_t num_caches = caches_.size();
+        if (num_caches > 0)
+        {
+            avg_stats.hits /= num_caches;
+            avg_stats.misses /= num_caches;
+            avg_stats.reads /= num_caches;
+            avg_stats.writes /= num_caches;
+            avg_stats.conflicts /= num_caches;
+        }
+        return avg_stats;
     }
 
     std::string SimulatorConfig::getPolicyName(ReplacementPolicy policy)
