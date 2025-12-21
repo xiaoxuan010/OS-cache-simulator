@@ -9,6 +9,7 @@ using namespace cache_sim;
  */
 void printUsage(const char *program_name)
 {
+    std::cout << "OS-cache-simulator: 基于 LRU 的用户态缓存系统模拟器" << std::endl;
     std::cout << "用法: " << program_name << " [选项]" << std::endl;
     std::cout << std::endl;
     std::cout << "选项:" << std::endl;
@@ -157,6 +158,10 @@ bool parseArguments(int argc, char *argv[], SimulatorConfig &config)
             }
             config.working_set_period = std::stoul(argv[i]);
         }
+        else if (arg == "-j" || arg == "--json")
+        {
+            config.output_json = true;
+        }
         else
         {
             std::cerr << "错误: 未知的选项 '" << arg << "'" << std::endl;
@@ -169,8 +174,6 @@ bool parseArguments(int argc, char *argv[], SimulatorConfig &config)
 
 int main(int argc, char *argv[])
 {
-    std::cout << "OS-cache-simulator: 基于 LRU 的用户态缓存系统模拟器" << std::endl;
-
     SimulatorConfig config;
 
     if (!parseArguments(argc, argv, config))

@@ -32,6 +32,7 @@ namespace cache_sim
         ReplacementPolicy replacement_policy; // 替换策略
         int num_cores;                        // 核心数量
         size_t working_set_period;            // 工作集切换周期（访问次数）
+        bool output_json = false;             // 是否输出JSON格式结果
 
         // 获取当前替换策略的名称
         static std::string getPolicyName(ReplacementPolicy policy);
@@ -57,6 +58,9 @@ namespace cache_sim
 
         // 获取当前访问模式的名称
         static std::string getPatterName(AccessPattern pattern);
+
+        // 平均统计数据
+        CacheStats getAverageStats() const;
 
     private:
         SimulatorConfig config_;

@@ -57,37 +57,88 @@ namespace cache_sim
 
     void CacheSimulator::printResults() const
     {
-        std::cout << "========== 缓存模拟结果 ==========" << std::endl;
-        std::cout << "--- 模拟器配置 ---" << std::endl;
-        std::cout << "核心数量: " << config_.num_cores << std::endl;
-        std::cout << "替换策略: " << SimulatorConfig::getPolicyName(config_.replacement_policy) << std::endl;
-        std::cout << "访问模式: " << getPatterName(config_.access_pattern) << std::endl;
-        std::cout << "访问次数: " << config_.num_accesses << std::endl;
-        std::cout << std::endl;
-
-        const CacheConfig &config = caches_[0]->getConfig();
-        std::cout << "--- 缓存配置 ---" << std::endl;
-        std::cout << "缓存大小: " << config.cache_size << " 字节 ("
-                  << config.cache_size / 1024 << " KB)" << std::endl;
-        std::cout << "块大小: " << config.block_size << " 字节" << std::endl;
-        std::cout << "关联度: " << config.associativity << " 路组相联" << std::endl;
-        std::cout << std::endl;
-
-        for (int i = 0; i < config_.num_cores; ++i)
+        if (config_.output_json)
         {
-            const CacheStats &stats = caches_[i]->getStats();
-            std::cout << "--- Core " << i << " 统计 ---" << std::endl;
-            std::cout << "读操作次数: " << stats.reads << std::endl;
-            std::cout << "写操作次数: " << stats.writes << std::endl;
-            std::cout << "缓存命中: " << stats.hits << std::endl;
-            std::cout << "缓存缺失: " << stats.misses << std::endl;
-            std::cout << std::fixed << std::setprecision(2);
-            std::cout << "命中率: " << stats.hitRate() * 100 << "%" << std::endl;
-            std::cout << "冲突次数: " << stats.conflicts << std::endl;
-            std::cout << "冲突率: " << stats.conflictRate() * 100 << "%" << std::endl;
-            std::cout << std::endl;
+            std::ostringstream oss;
+            oss << "{\n  \"cores\": [\n";
+            for (int i = 0; i < config_.num_cores; ++i)
+            {
+                const CacheStats &stats = caches_[i]->getStats();
+                double hit_rate = stats.hitRate() * 100.0;
+                double conflict_rate = stats.conflictRate() * 100.0;
+                oss << "    {\n"
+                    << "      \"core_id\": " << i << ",\n"
+                    << "      \"reads\": " << stats.reads << ",\n"
+                    << "      \"writes\": " << stats.writes << ",\n"
+                    << "      \"hits\": " << stats.hits << ",\n"
+                    << "      \"misses\": " << stats.misses << ",\n"
+                    << "      \"hit_rate\": " << std::fixed << std::setprecision(2) << hit_rate << ",\n"
+                    << "      \"conflicts\": " << stats.conflicts << ",\n"
+                    << "      \"conflict_rate\": " << std::fixed << std::setprecision(2) << conflict_rate << "\n"
+                    << "    }" << (i + 1 == config_.num_cores ? "\n" : ",\n");
+            }
+            CacheStats avg_stats = getAverageStats();
+            double avg_hit_rate = avg_stats.hitRate() * 100.0;
+            double avg_conflict_rate = avg_stats.conflictRate() * 100.0;
+            oss << "  ],\n"
+                << "  \"average\": {\n"
+                << "    \"reads\": " << avg_stats.reads << ",\n"
+                << "    \"writes\": " << avg_stats.writes << ",\n"
+                << "    \"hits\": " << avg_stats.hits << ",\n"
+                << "    \"misses\": " << avg_stats.misses << ",\n"
+                << "    \"hit_rate\": " << std::fixed << std::setprecision(2) << avg_hit_rate << ",\n"
+                << "    \"conflicts\": " << avg_stats.conflicts << ",\n"
+                << "    \"conflict_rate\": " << std::fixed << std::setprecision(2) << avg_conflict_rate << "\n"
+                << "  }\n"
+                << "}\n";
+            std::cout << oss.str();
         }
-        std::cout << "==================================" << std::endl;
+        else
+        {
+            std::cout << "========== 缓存模拟结果 ==========" << std::endl;
+            std::cout << "--- 模拟器配置 ---" << std::endl;
+            std::cout << "核心数量: " << config_.num_cores << std::endl;
+            std::cout << "替换策略: " << SimulatorConfig::getPolicyName(config_.replacement_policy) << std::endl;
+            std::cout << "访问模式: " << getPatterName(config_.access_pattern) << std::endl;
+            std::cout << "访问次数: " << config_.num_accesses << std::endl;
+            std::cout << std::endl;
+
+            const CacheConfig &config = caches_[0]->getConfig();
+            std::cout << "--- 缓存配置 ---" << std::endl;
+            std::cout << "缓存大小: " << config.cache_size << " 字节 ("
+                      << config.cache_size / 1024 << " KB)" << std::endl;
+            std::cout << "块大小: " << config.block_size << " 字节" << std::endl;
+            std::cout << "关联度: " << config.associativity << " 路组相联" << std::endl;
+            std::cout << std::endl;
+
+            for (int i = 0; i < config_.num_cores; ++i)
+            {
+                const CacheStats &stats = caches_[i]->getStats();
+                std::cout << "--- Core " << i << " 统计 ---" << std::endl;
+                std::cout << "读操作次数: " << stats.reads << std::endl;
+                std::cout << "写操作次数: " << stats.writes << std::endl;
+                std::cout << "缓存命中: " << stats.hits << std::endl;
+                std::cout << "缓存缺失: " << stats.misses << std::endl;
+                std::cout << std::fixed << std::setprecision(2);
+                std::cout << "命中率: " << stats.hitRate() * 100 << "%" << std::endl;
+                std::cout << "冲突次数: " << stats.conflicts << std::endl;
+                std::cout << "冲突率: " << stats.conflictRate() * 100 << "%" << std::endl;
+                std::cout << std::endl;
+            }
+
+            std::cout << "--- 平均统计 ---" << std::endl;
+            CacheStats avg_stats = getAverageStats();
+            std::cout << "读操作次数: " << avg_stats.reads << std::endl;
+            std::cout << "写操作次数: " << avg_stats.writes << std::endl;
+            std::cout << "缓存命中: " << avg_stats.hits << std::endl;
+            std::cout << "缓存缺失: " << avg_stats.misses << std::endl;
+            std::cout << std::fixed << std::setprecision(2);
+            std::cout << "命中率: " << avg_stats.hitRate() * 100 << "%" << std::endl;
+            std::cout << "冲突次数: " << avg_stats.conflicts << std::endl;
+            std::cout << "冲突率: " << avg_stats.conflictRate() * 100 << "%" << std::endl;
+            
+            std::cout << "==================================" << std::endl;
+        }
     }
 
     uint64_t CacheSimulator::generateAddress(size_t index) const
