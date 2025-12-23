@@ -1,13 +1,18 @@
 #include "lru_cache.h"
+#include <chrono>
 
 namespace cache_sim
 {
 
+    LRUCache::LRUCache(const CacheConfig &config, int id, Bus *bus)
+        : Cache(config, id, bus)
+    {
+        lru_sets_.resize(sets_.size());
+    }
+
     CacheLine *LRUCache::selectVictim(size_t set_index)
     {
         CacheSet &set = sets_[set_index];
-        CacheLine *victim = nullptr;
-        uint64_t min_time = UINT64_MAX;
 
         // 首先查找无效的缓存行
         for (auto &line : set.lines)
@@ -19,30 +24,53 @@ namespace cache_sim
         }
 
         stats_.conflicts++;
-        // 选择最近最少使用的缓存行
-        for (auto &line : set.lines)
+        
+        // 使用 LRU 双向链表查找
+        auto &lru_set = lru_sets_[set_index];
+        if (!lru_set.lru_list.empty())
         {
-            if (line.last_access_time < min_time)
-            {
-                min_time = line.last_access_time;
-                victim = &line;
-            }
+            // 返回最久未使用的缓存行
+            return lru_set.lru_list.back();
         }
 
-        return victim;
+        return &set.lines[0];
     }
 
-    void LRUCache::updateAccessInfo(CacheLine *line)
+    void LRUCache::updateAccessInfo(size_t set_index, CacheLine *line)
     {
-        if (line != nullptr)
+        if (line == nullptr) return;
+
+        line->last_access_time = std::chrono::steady_clock::now().time_since_epoch().count();
+
+        auto &lru_set = lru_sets_[set_index];
+        auto it = lru_set.line_to_node.find(line);
+
+        if (it != lru_set.line_to_node.end())
         {
-            line->last_access_time = std::chrono::steady_clock::now().time_since_epoch().count();
+            // 已经在列表中，移动到头部 (MRU)
+            lru_set.lru_list.splice(lru_set.lru_list.begin(), lru_set.lru_list, it->second);
+        }
+        else
+        {
+            // 不在列表中，插入到头部
+            lru_set.lru_list.push_front(line);
+            lru_set.line_to_node[line] = lru_set.lru_list.begin();
         }
     }
 
-    void LRUCache::resetLine(CacheLine *)
+    void LRUCache::resetLine(size_t set_index, CacheLine *line)
     {
-        // 什么都不用做，因为 LRU 不需要额外重置信息
+        if (line == nullptr) return;
+
+        auto &lru_set = lru_sets_[set_index];
+        auto it = lru_set.line_to_node.find(line);
+
+        if (it != lru_set.line_to_node.end())
+        {
+            // 从 LRU 列表中移除
+            lru_set.lru_list.erase(it->second);
+            lru_set.line_to_node.erase(it);
+        }
     }
 
 } // namespace cache_sim

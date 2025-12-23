@@ -37,7 +37,7 @@ namespace cache_sim
         return victim;
     }
 
-    void LFUCache::updateAccessInfo(CacheLine *line)
+    void LFUCache::updateAccessInfo(size_t /*set_index*/, CacheLine *line)
     {
         if (line != nullptr)
         {
@@ -46,9 +46,9 @@ namespace cache_sim
         }
     }
 
-    void LFUCache::resetLine(CacheLine *line)
+    void LFUCache::resetLine(size_t /*set_index*/, CacheLine *line)
     {
-        if (line)
+        if (line != nullptr)
         {
             line->access_count = 0;
         }

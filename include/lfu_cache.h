@@ -14,8 +14,8 @@ namespace cache_sim
         ~LFUCache() override = default;
 
         CacheLine *selectVictim(size_t set_index) override;
-        void updateAccessInfo(CacheLine *line) override;
-        void resetLine(CacheLine *line) override;
+        void updateAccessInfo(size_t set_index, CacheLine *line) override;
+        void resetLine(size_t set_index, CacheLine *line) override;
     };
 
 } // namespace cache_sim

@@ -76,7 +76,7 @@ namespace cache_sim
         {
             // 缓存命中
             stats_.hits++;
-            updateAccessInfo(line);
+            updateAccessInfo(getSetIndex(address), line);
             // 状态保持不变 (M, E, S 都可以读)
             return true;
         }
@@ -89,7 +89,7 @@ namespace cache_sim
         CacheLine *victim = selectVictim(set_index);
 
         // 重置被驱逐的行
-        resetLine(victim);
+        resetLine(set_index, victim);
 
         // 广播读请求 (BusRd)
         bool is_shared = false;
@@ -113,7 +113,7 @@ namespace cache_sim
             victim->state = MESIState::Exclusive;
         }
 
-        updateAccessInfo(victim);
+        updateAccessInfo(set_index, victim);
 
         return false;
     }
@@ -128,7 +128,7 @@ namespace cache_sim
         {
             // 缓存命中
             stats_.hits++;
-            updateAccessInfo(line);
+            updateAccessInfo(getSetIndex(address), line);
 
             // 如果是 Shared 状态，需要升级为 Modified
             if (line->state == MESIState::Shared)
@@ -159,7 +159,7 @@ namespace cache_sim
         CacheLine *victim = selectVictim(set_index);
 
         // 重置被驱逐的行
-        resetLine(victim);
+        resetLine(set_index, victim);
 
         // 广播写请求 (BusRdX)
         if (bus_)
@@ -172,7 +172,7 @@ namespace cache_sim
         victim->tag = getTag(address);
         victim->dirty = true;
         victim->state = MESIState::Modified;
-        updateAccessInfo(victim);
+        updateAccessInfo(set_index, victim);
 
         return false;
     }

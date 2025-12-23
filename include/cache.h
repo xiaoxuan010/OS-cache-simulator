@@ -98,10 +98,10 @@ namespace cache_sim
         virtual CacheLine *selectVictim(size_t set_index) = 0;
 
         // 更新访问信息（由子类实现）
-        virtual void updateAccessInfo(CacheLine *line) = 0;
+        virtual void updateAccessInfo(size_t set_index, CacheLine *line) = 0;
 
         // 重置缓存行信息（当行被驱逐或重新分配时调用，由子类实现）
-        virtual void resetLine(CacheLine *) = 0;
+        virtual void resetLine(size_t set_index, CacheLine *) = 0;
 
         // 获取统计信息
         const CacheStats &getStats() const
