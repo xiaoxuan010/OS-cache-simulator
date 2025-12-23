@@ -23,6 +23,7 @@ void printUsage(const char *program_name)
     std::cout << "  -r, --range <字节>      地址范围（默认: 1048576，即 1MB）" << std::endl;
     std::cout << "  -c, --cores <数量>      CPU 核心数（默认: 1）" << std::endl;
     std::cout << "  -w, --ws-period <次数>  工作集切换周期（默认: 10000）" << std::endl;
+    std::cout << "  -v, --ws-size <字节>    工作集大小（默认: 65536，即 64KB）" << std::endl;
     std::cout << std::endl;
     std::cout << "示例:" << std::endl;
     std::cout << "  " << program_name << " -s 65536 -b 64 -a 4 -p lru -t random -n 10000" << std::endl;
@@ -157,6 +158,15 @@ bool parseArguments(int argc, char *argv[], SimulatorConfig &config)
                 return false;
             }
             config.working_set_period = std::stoul(argv[i]);
+        }
+        else if (arg == "-v" || arg == "--ws-size")
+        {
+            if (++i >= argc)
+            {
+                std::cerr << "错误: 缺少工作集大小参数" << std::endl;
+                return false;
+            }
+            config.working_set_size = std::stoul(argv[i]);
         }
         else if (arg == "-j" || arg == "--json")
         {

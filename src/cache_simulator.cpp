@@ -164,7 +164,7 @@ namespace cache_sim
             if (prob_dist(rng) < 0.9)
             {
                 // 局部访问：在当前工作集附近
-                size_t working_set_size = config_.cache_config.cache_size;
+                size_t working_set_size = config_.working_set_size;
                 size_t base = (index / config_.working_set_period) * working_set_size;
                 std::uniform_int_distribution<uint64_t> local_dist(0, working_set_size - 1);
                 return (base + local_dist(rng)) % config_.address_range;
