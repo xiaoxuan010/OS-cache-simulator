@@ -1,2 +1,6 @@
 build/
 .vscode/
+
+.venv/
+scripts/*.ipynb
+scripts/outputs/
