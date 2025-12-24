@@ -1,5 +1,8 @@
 #include <bits/stdc++.h>
 #include "cache_simulator.h"
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 using namespace cache_sim;
 
@@ -184,6 +187,10 @@ bool parseArguments(int argc, char *argv[], SimulatorConfig &config)
 
 int main(int argc, char *argv[])
 {
+#ifdef _WIN32
+    SetConsoleOutputCP(CP_UTF8);
+#endif
+
     SimulatorConfig config;
 
     if (!parseArguments(argc, argv, config))
