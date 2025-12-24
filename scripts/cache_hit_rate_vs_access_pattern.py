@@ -62,7 +62,8 @@ for pattern in access_patterns:
             print(f"运行模拟出错 size={size}, pattern={pattern}: {e}")
 
 df = pd.DataFrame(results)
-output_csv_path = f"outputs/cache_hit_rate_vs_access_pattern_n{num_accesses}_a{associativity}.csv"
+base_filename = f"outputs/cache_hit_rate_vs_access_pattern_n{num_accesses}_a{associativity}"
+output_csv_path = f"{base_filename}.csv"
 df.to_csv(output_csv_path, index=False)
 print(f"数据已保存至: {output_csv_path}")
 
@@ -88,7 +89,7 @@ plt.title(f"不同访问模式的命中率随缓存大小变化\n(LRU, {associat
 plt.grid(True, which="both", linestyle="--", alpha=0.5)
 
 plt.tight_layout()
-output_img_path = f"outputs/cache_hit_rate_vs_access_pattern.png"
+output_img_path = f"{base_filename}.png"
 plt.savefig(output_img_path, dpi=300)
 print(f"图表已保存至: {output_img_path}")
-plt.show()
+# plt.show()

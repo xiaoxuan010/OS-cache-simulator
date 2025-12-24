@@ -71,7 +71,8 @@ for i, num_acc in enumerate(access_counts):
         print(f"运行模拟出错 num_accesses={num_acc}: {e}")
 
 df = pd.DataFrame(results)
-output_csv_path = f"outputs/cache_hit_rate_vs_num_accesses_w{ws_period}_s{cache_size}_p{access_pattern}_a{associativity}.csv"
+base_filename = f"outputs/cache_hit_rate_vs_num_accesses_w{ws_period}_s{cache_size}_p{access_pattern}_a{associativity}"
+output_csv_path = f"{base_filename}.csv"
 df.to_csv(output_csv_path, index=False)
 print(f"数据已保存至: {output_csv_path}")
 
@@ -198,7 +199,7 @@ if not df.empty:
     )
 
 plt.tight_layout()
-output_img_path = f"outputs/cache_hit_rate_comparison_vs_accesses_w{ws_period}_s{cache_size}_p{access_pattern}_a{associativity}.png"
+output_img_path = f"{base_filename}.png"
 plt.savefig(output_img_path, dpi=300, bbox_inches="tight")
 print(f"图表已保存至: {output_img_path}")
-plt.show()
+# plt.show()

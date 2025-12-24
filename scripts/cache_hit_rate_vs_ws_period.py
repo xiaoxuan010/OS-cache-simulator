@@ -74,7 +74,8 @@ for i, ws in enumerate(ws_periods):
         print(f"运行模拟出错 ws_period={ws}: {e}")
 
 df = pd.DataFrame(results)
-output_csv_path = f"outputs/cache_hit_rate_vs_ws_period_n{num_accesses}_s{cache_size}_p{access_pattern}_a{associativity}.csv"
+base_filename = f"outputs/cache_hit_rate_vs_ws_period_n{num_accesses}_s{cache_size}_p{access_pattern}_a{associativity}"
+output_csv_path = f"{base_filename}.csv"
 df.to_csv(output_csv_path, index=False)
 print(f"数据已保存至: {output_csv_path}")
 
@@ -174,7 +175,7 @@ if not df.empty:
         )
 
 plt.tight_layout()
-output_img_path = f"outputs/cache_hit_rate_comparison_n{num_accesses}_s{cache_size}_p{access_pattern}_a{associativity}.png"
+output_img_path = f"{base_filename}.png"
 plt.savefig(output_img_path, dpi=300, bbox_inches="tight")
 print(f"图表已保存至: {output_img_path}")
-plt.show()
+# plt.show()

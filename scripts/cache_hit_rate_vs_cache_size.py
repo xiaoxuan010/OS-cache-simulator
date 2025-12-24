@@ -64,7 +64,8 @@ df = pd.DataFrame(results)
 print("数据形状:", df.shape)
 
 # 保存CSV (原笔记本未保存，这里补充)
-output_csv_path = f"outputs/cache_hit_rate_by_size_n{num_accesses}_a{associativity}_p{access_pattern}.csv"
+base_filename = f"outputs/cache_hit_rate_vs_cache_size_n{num_accesses}_a{associativity}_p{access_pattern}"
+output_csv_path = f"{base_filename}.csv"
 df.to_csv(output_csv_path, index=False)
 print(f"数据已保存至: {output_csv_path}")
 
@@ -116,7 +117,7 @@ ax1.legend(title="Cache Size")
 ax1.grid(True, alpha=0.3)
 
 plt.tight_layout()
-output_img_path = f"outputs/cache_hit_rate_by_size_n{num_accesses}_a{associativity}_p{access_pattern}.png"
+output_img_path = f"{base_filename}.png"
 plt.savefig(output_img_path, dpi=300, bbox_inches="tight")
 print(f"图表已保存至: {output_img_path}")
-plt.show()
+# plt.show()
